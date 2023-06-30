@@ -1,7 +1,7 @@
 const messageElement = document.querySelector('.message');
 const cells = document.querySelectorAll('.cell');
 
-let currentPlayer = 'X';
+let currentPlayer = 'Player1';
 
 function handleCellClick(event) {
     const cell = event.target;
@@ -16,7 +16,7 @@ function handleCellClick(event) {
         messageElement.textContent = `${currentPlayer}, congratulations you won! `;
         return;
     }
-    currentPlayer = (currentPlayer === 'X') ? '0' : 'X';
+    currentPlayer = (currentPlayer === 'Player1') ? 'Player2' : 'Player1';
 
     messageElement.textContent = `${currentPlayer}, you're up`;
 }
