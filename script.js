@@ -1,71 +1,87 @@
-const messageElement = document.querySelector('.message');
-const cells = document.querySelectorAll('.cell');
+const startButton = document.getElementById("submit");
+const gameBoard = document.querySelector(".game");
+const gameDetails = document.querySelector(".details");
+const gameMessage = document.querySelector(".message");
 
-let currentPlayer = 'Player1';
+let player1Name = "";
+let player2Name = "";
+let isPlaying = true;
+let activePlayer = 0;
 
-function handleCellClick(event) {
-    const cell = event.target;
-
-
-    if (cell.textContent !== '') {
-        return;
-    }
-    cell.textContent = currentPlayer;
-
-    if (checkWin()) {
-        messageElement.textContent = `${currentPlayer}, congratulations you won! `;
-        return;
-    }
-    currentPlayer = (currentPlayer === 'Player1') ? 'Player2' : 'Player1';
-
-    messageElement.textContent = `${currentPlayer}, you're up`;
+function displayMessage(msg) {
+    gameMessage.innerHTML = `<h3>${msg}</h3>`;
 }
 
-function checkWin() {
-    const board = [
-        [getCell(1), getCell(2), getCell(3)],
-        [getCell(4), getCell(5), getCell(6)],
-        [getCell(7), getCell(8), getCell(9)]
-    ];
+function switchPlayer() {
+    activePlayer = activePlayer === 0 ? 1 : 0;
+}
 
-    // Check rows
-    for (let row = 0; row < 3; row++) {
-        if (
-            board[row][0] !== '' &&
-            board[row][0] === board[row][1] &&
-            board[row][0] === board[row][2]
-        ) {
-            return true; // Row win
+function initializeGame() {
+    player1Name = document.getElementById("player1").value;
+    player2Name = document.getElementById("player2").value;
+
+    activePlayer = 0;
+
+    gameDetails.style.display = "none";
+    gameBoard.style.display = "flex";
+
+    displayMessage(`${player1Name},you're up`);
+
+    for (let i = 1; i <= 9; i++) {
+        const slot = document.createElement("div");
+        slot.id = i;
+        slot.classList.add("game-slot");
+
+        slot.addEventListener("click", function() {
+            if (!slot.innerText && isPlaying) {
+                slot.innerText = activePlayer === 0 ? "x" : "o";
+                const winner = checkWinner()
+
+                if (!winner) {
+                    switchPlayer();
+                    displayMessage(`${activePlayer === 0 ? player1Name : player2Name}, you're up`);
+                } else {
+                    displayMessage(`${activePlayer === 0 ? player1Name : player2Name} congratulations you won!.`);
+                }
+            }
+        });
+        gameBoard.appendChild(slot);
+    }
+}
+const winningSequences = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+];
+
+function checkWinner() {
+    let hasWinner = false;
+
+    for (let i = 0; i < winningSequences.length; i++) {
+        const winningCombo = winningSequences[i];
+
+        const cell1 = document.getElementById(winningCombo[0] + 1);
+        const cell2 = document.getElementById(winningCombo[1] + 1);
+        const cell3 = document.getElementById(winningCombo[2] + 1);
+
+        const val1 = cell1.innerText;
+        const val2 = cell2.innerText;
+        const val3 = cell3.innerText;
+
+        if (val1 === val2 && val2 === val3 && val1 != '') {
+            hasWinner = true;
+            isPlaying = false;
+            cell1.style.backgroundColor = "purple";
+            cell2.style.backgroundColor = "purple";
+            cell3.style.backgroundColor = "purple";
+            break;
         }
     }
-
-    // Check columns
-    for (let col = 0; col < 3; col++) {
-        if (
-            board[0][col] !== '' &&
-            board[0][col] === board[1][col] &&
-            board[0][col] === board[2][col]
-        ) {
-            return true; // Column win
-        }
-    }
-
-    // Check diagonals
-    if (
-        (board[0][0] !== '' && board[0][0] === board[1][1] && board[0][0] === board[2][2]) ||
-        (board[0][2] !== '' && board[0][2] === board[1][1] && board[0][2] === board[2][0])
-    ) {
-        return true; // Diagonal win
-    }
-
-    return false; // No win
+    return hasWinner;
 }
-
-// Function to get the content of a cell given its id
-function getCell(id) {
-    return document.getElementById(id).textContent;
-}
-
-cells.forEach(cell => {
-    cell.addEventListener('click', handleCellClick);
-});
+startButton.addEventListener("click", initializeGame);
